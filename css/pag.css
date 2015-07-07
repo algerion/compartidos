@@ -1,0 +1,22 @@
+.elemdir
+{
+	font-weight: bold;
+}
+
+.subelemdir
+{
+	font-style: italic;
+}
+
+.elemdir, .subelemdir
+{
+	font-name: Arial;
+	font-size: 10pt;
+	cursor: pointer;
+}
+
+span
+{
+	font-name: Arial;
+	font-size: 10pt;
+}

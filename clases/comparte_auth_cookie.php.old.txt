@@ -1,0 +1,71 @@
+<?php
+require_once('../compartidos/clases/HMAC.php');
+
+class Comparte_Auth_Cookie
+{
+	public static function CreaCookies($origen)
+	{
+		$username = strtolower($origen->User->Name);
+		$address = $origen->Request->UserHostAddress;
+		$sql = "SELECT password FROM gencatusuario WHERE idUsuario = :idUsuario";
+		$command = $origen->dbConexion->createCommand($sql);
+		$command->bindValue(":idUsuario", $username);
+		$token = $command->queryScalar();
+		$data = array($username, $address, $token);
+		$data = serialize($data);
+		$data = $origen->Application->SecurityManager->hashData($data);
+		$mun_cookie = new THttpCookie("user_dbmunioax", $data);
+		$origen->Response->Cookies[] = $mun_cookie;
+		$hash_cookie = new THttpCookie("hash_dbmunioax", $origen->Application->SecurityManager->ValidationKey);
+		$origen->Response->Cookies[] = $hash_cookie;
+	}
+
+	public static function CreaUsuario($origen)
+	{
+		if($origen->Request->Cookies["user_dbmunioax"] != null)
+		{
+			$data = $origen->Request->Cookies["user_dbmunioax"]->Value;
+			$origen->Application->SecurityManager->ValidationKey =
+					$origen->Request->Cookies["hash_dbmunioax"]->Value;
+
+			if(($data = $origen->Application->SecurityManager->validateData($data)) !== false)
+			{
+				$data = unserialize($data);
+				if(is_array($data) && count($data) === 3)
+				{
+					list($username, $address, $token) = $data;
+					$sql = "SELECT login, password FROM gencatusuario WHERE idUsuario = :idUsuario";
+					$command = $origen->dbConexion->createCommand($sql);
+					$command->bindValue(":idUsuario", $username);
+					$resultado = $command->query();
+					if($row = $resultado->read())
+						if($token === $row["password"] && $token !== false && $address =
+								$origen->Request->UserHostAddress)
+						{
+							$phphmac = new Crypt_HMAC($_SESSION["aleat"]);
+							$password = $phphmac->hash($row["password"]);
+					        $authManager=$origen->Application->getModule('auth');
+							$x = $authManager->login($row["login"], $password, 3600);
+						}
+				}
+			}
+		}
+	}
+
+	public static function BorraCookies($origen)
+	{
+		if($origen->Request->Cookies["user_dbmunioax"] != null)
+		{
+			$cookie = new THttpCookie("user_dbmunioax", "");
+			$cookie->Expire = time() - 1;
+			$origen->Response->Cookies->Add($cookie);
+		}
+		if($origen->Request->Cookies["hash_dbmunioax"] != null)
+		{
+			$cookie = new THttpCookie("user_dbmunioax", "");
+			$cookie->Expire = time() - 1;
+			$origen->Response->Cookies->Add($cookie);
+		}
+	}
+}
+?>
