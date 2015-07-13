@@ -1,5 +1,5 @@
 <?php
-class LeeDBF
+class UsaDBF
 {
 	public static function echo_dbf($dbfname) 
 	{
@@ -28,6 +28,44 @@ class LeeDBF
 	}
 
 	public static function registros_dbf($dbfname) 
+	{
+		$fdbf = fopen($dbfname,'r');
+		$fields = array();
+		$records = array();
+		$buf = fread($fdbf,32);
+		$header = unpack("VRecordCount/vFirstRecord/vRecordLength", substr($buf, 4, 8));
+		$unpackString = '';
+
+		// read fields:
+		while (!feof($fdbf)) 
+		{ 
+			$buf = fread($fdbf, 32);
+			if(substr($buf, 0, 1) != chr(13)) 
+			{
+				$field = unpack("a11fieldname/A1fieldtype/Voffset/Cfieldlen/Cfielddec", substr($buf, 0, 18));
+				$unpackString .= "A$field[fieldlen]$field[fieldname]/";
+				array_push($fields, $field);
+			}
+			else
+				break;
+		}
+
+		// move back to the start of the first record (after the field definitions)
+		fseek($fdbf, $header['FirstRecord'] + 1); 
+
+		//raw record*/
+		for ($i = 1; $i <= $header['RecordCount']; $i++) 
+		{
+			$buf = fread($fdbf, $header['RecordLength']);
+			$record = unpack($unpackString, $buf);
+			array_push($records, $record);
+		} 
+		fclose($fdbf); 
+		
+		return $records;
+	}
+
+	public static function crea_dbf($dbfname) 
 	{
 		$fdbf = fopen($dbfname,'r');
 		$fields = array();
