@@ -204,6 +204,32 @@ class Conexion
 		return $cmdConsulta->execute();
 	}
 
+	public static function Inserta_Actualiza_Registros($conexion, $tabla, $registros, $parametros, $seleccion, 
+			$codif_fte = 'CP850', $codif_dest = 'UTF-8')
+	{
+		foreach($registros as $r)
+		{
+			$linea_sel = array();
+			$linea_ins = array();
+			$linea_upd = array();
+			foreach($parametros as $k=>$p)
+				$linea_upd[$k] = strcmp(substr($p, 0, 1), ':') ? Charset::CambiaCharset($r[$p], $codif_fte, $codif_dest) : 
+						substr($p, 1, strlen($p) - 1);
+			foreach($seleccion as $k=>$p)
+				$linea_sel[$k] = Charset::CambiaCharset($r[$p], $codif_fte, $codif_dest);
+			$linea_ins = array_merge($linea_sel, $linea_upd);
+			try
+			{
+				Conexion::Inserta_Registro($conexion, $tabla, $linea_ins);
+			}
+			catch(Exception $e)
+			{
+				Conexion::Actualiza_Registro($conexion, $tabla, $linea_upd, $linea_sel);
+			}
+		}
+		var_dump($linea_upd);
+	}
+	
 	public static function Elimina_Registro($conexion, $tabla, $seleccion)
 	{
 		//Consecutivo para nombrar parámetros
