@@ -227,7 +227,6 @@ class Conexion
 				Conexion::Actualiza_Registro($conexion, $tabla, $linea_upd, $linea_sel);
 			}
 		}
-		var_dump($linea_upd);
 	}
 	
 	public static function Elimina_Registro($conexion, $tabla, $seleccion)
