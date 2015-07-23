@@ -216,7 +216,8 @@ class Conexion
 				$linea_upd[$k] = strcmp(substr($p, 0, 1), ':') ? Charset::CambiaCharset($r[$p], $codif_fte, $codif_dest) : 
 						substr($p, 1, strlen($p) - 1);
 			foreach($seleccion as $k=>$p)
-				$linea_sel[$k] = Charset::CambiaCharset($r[$p], $codif_fte, $codif_dest);
+				$linea_sel[$k] = strcmp(substr($p, 0, 1), ':') ? Charset::CambiaCharset($r[$p], $codif_fte, $codif_dest) : 
+						substr($p, 1, strlen($p) - 1);
 			$linea_ins = array_merge($linea_sel, $linea_upd);
 			try
 			{
