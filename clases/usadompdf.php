@@ -8,21 +8,21 @@ class usadompdf
 {
 	public static function creapdf($url, $tam = "letter", $orient = "portrait")
 	{
-//		file_put_contents("temp/fila.txt", "");
+//		file_put_contents("fila.txt", "");
 
 		$html = file_get_contents($url);
 		if(get_magic_quotes_gpc())
 			$html = stripslashes($html);
 			
 		$ini = strpos($html, '<form');
-		$fin = strpos($html, '</div>', $ini);
+		$fin = strpos($html, '">', $ini);
 		if($ini > 0)
 		{
-			$html = substr_replace($html, "", $ini, $fin - $ini + 6);
+			$html = substr_replace($html, "", $ini, $fin - $ini + 2);
 			$html = str_replace("</form>", "", $html);
 		}
 		
-//		file_put_contents("temp/fila.txt", $html . "\r\n", FILE_APPEND);
+//		file_put_contents("fila.txt", $html . "\r\n", FILE_APPEND);
 		$dompdf = new DOMPDF();
 		$dompdf->load_html($html);
 		$dompdf->set_paper($tam, $orient);
