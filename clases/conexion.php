@@ -24,7 +24,7 @@ class Conexion
 		date_default_timezone_set("America/Mexico_City");
 	}
 
-	public static function Retorna_Campo($conexion, $tabla, $campo_consulta, $busqueda)
+	public static function Retorna_Campo($conexion, $tabla, $campo_consulta, $busqueda, $modificadores = "")
 	{
 		//Consecutivo para nombrar parámetros
 		$consecutivo = 0;
@@ -44,6 +44,8 @@ class Conexion
 		}
 
 		$consulta = "SELECT " . $campo_consulta . " FROM " . $tabla . " WHERE " . $lista_busqueda;
+		if($modificadores != "")
+			$consulta .= " " . $modificadores;
 		$cmdConsulta = $conexion->createCommand($consulta);
 
 		//Reinicia consecutivo para enlazar los parámetros con sus valores
