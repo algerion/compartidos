@@ -102,7 +102,7 @@ class Conexion
 		return $drLector->readAll();
 	}
 
-	public static function Retorna_Registro($conexion, $tabla, $busqueda, $modificadores = "")
+	public static function Retorna_Registro($conexion, $tabla, $busqueda = null, $modificadores = "")
 	{
 		//Consecutivo para nombrar parámetros
 		$consecutivo = 0;
@@ -113,15 +113,18 @@ class Conexion
 		try
 		{
 			//Se extrae los nombres de campos del arreglo "$busqueda" para formar la consulta. Los valores no se usan.
-			foreach($busqueda as $campo=>$valor)
-				$lista_busqueda .= ($lista_busqueda != "" ? " AND " : "") . $campo . " = :param" . $consecutivo++;
+			if($busqueda != null)
+				foreach($busqueda as $campo=>$valor)
+					$lista_busqueda .= ($lista_busqueda != "" ? " AND " : "") . $campo . " = :param" . $consecutivo++;
 		}
 		catch(Exception $e)
 		{
 			trigger_error("Tabla: " . $tabla . " - Busqueda: " . $busqueda, E_USER_ERROR);
 		}
 
-		$consulta = "SELECT * FROM " . $tabla . " WHERE " . $lista_busqueda;
+		$consulta = "SELECT * FROM " . $tabla;
+		if($busqueda != null)
+			$consulta .= " WHERE " . $lista_busqueda;
 		if($modificadores != "")
 			$consulta .= " " . $modificadores;
 		$cmdConsulta = $conexion->createCommand($consulta);
@@ -129,10 +132,12 @@ class Conexion
 		//Reinicia consecutivo para enlazar los parámetros con sus valores
 		$consecutivo = 0;
 
-		foreach($busqueda as $campo=>$valor)
-			$cmdConsulta->bindValue(":param" . $consecutivo++, $valor);
+		if($busqueda != null)
+			foreach($busqueda as $campo=>$valor)
+				$cmdConsulta->bindValue(":param" . $consecutivo++, $valor);
 
 		$drLector = $cmdConsulta->query();
+		
 		return $drLector->readAll();
 	}
 
