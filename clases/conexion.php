@@ -24,6 +24,21 @@ class Conexion
 		date_default_timezone_set("America/Mexico_City");
 	}
 
+	public static function Consulta($conexion, $consulta, $parametros)
+	{
+		$cmdConsulta = $conexion->createCommand($consulta);
+
+		foreach($busqueda as $campo=>$valor)
+			$cmdConsulta->bindValue(":" . $campo, $valor);
+
+		if(substr($consulta, 0, 6) == "SELECT")
+			$resultado = $cmdConsulta->query()->readAll();
+		else
+			$resultado = $cmdConsulta->execute();
+
+		return $resultado;
+	}
+
 	public static function Retorna_Campo($conexion, $tabla, $campo_consulta, $busqueda, $modificadores = "")
 	{
 		//Consecutivo para nombrar parámetros
@@ -102,7 +117,7 @@ class Conexion
 		return $drLector->readAll();
 	}
 
-	public static function Retorna_Registro($conexion, $tabla, $busqueda, $modificadores = "")
+	public static function Retorna_Registro($conexion, $tabla, $busqueda = array(), $modificadores = "")
 	{
 		//Consecutivo para nombrar parámetros
 		$consecutivo = 0;
@@ -121,7 +136,9 @@ class Conexion
 			trigger_error("Tabla: " . $tabla . " - Busqueda: " . $busqueda, E_USER_ERROR);
 		}
 
-		$consulta = "SELECT * FROM " . $tabla . " WHERE " . $lista_busqueda;
+		$consulta = "SELECT * FROM " . $tabla;
+		if($lista_busqueda != "")
+			$consulta .= " WHERE " . $lista_busqueda;
 		if($modificadores != "")
 			$consulta .= " " . $modificadores;
 		$cmdConsulta = $conexion->createCommand($consulta);
