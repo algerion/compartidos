@@ -35,17 +35,8 @@ class DbCon
 	{
 		$lista_parametros = ""; //Lista para almacenar los nombres de parámetros que recibirán los valores.
 
-		try
-		{
-			foreach($parametros as $campo=>$valor) //Se extrae los nombres de campos del arreglo "$parametros" para formar la consulta. Los valores no se usan.
-			{
-				$lista_parametros .= ($lista_parametros != "" ? ", " : "") . ":" . $campo;
-			}
-		}
-		catch(Exception $e)
-		{
-			trigger_error("Tabla: " . $tabla . " - Parámetros: " . $parametros, E_USER_ERROR);
-		}
+		foreach($parametros as $campo=>$valor) //Se extrae los nombres de campos del arreglo "$parametros" para formar la consulta. Los valores no se usan.
+			$lista_parametros .= ($lista_parametros != "" ? ", " : "") . ":" . $campo;
 
 		$consulta = "INSERT INTO " . $tabla . " (" . str_replace(":", "", $lista_parametros) . 
 				") VALUES (" . $lista_parametros . ")";
@@ -78,6 +69,17 @@ class DbCon
 		return $comando->execute();
 	}
 
+	public function elimina($tabla, $parametros)
+	{
+		$lista_parametros = ""; //Lista para almacenar los nombres de parámetros que recibirán los valores.
+
+		foreach($parametros as $campo=>$valor) //Se extrae los nombres de campos del arreglo "$parametros" para formar la consulta. Los valores no se usan.
+			$lista_parametros .= ($lista_parametros != "" ? " AND " : " WHERE ") . $campo . " = :" . $campo;
+
+		$consulta = "DELETE FROM " . $tabla . $lista_parametros;
+		$this->consulta($consulta, $parametros);
+	}
+
 	public function ultimoIdGenerado()
 	{
 		$consulta = "SELECT LAST_INSERT_ID() AS id_gen";
@@ -91,7 +93,7 @@ class DbCon
 	{
 		$objeto->dataSource = $this->consulta($consulta, $parametros);
 		$objeto->dataBind();
-		if($objeto->Items->Count > 0)
+		if($objeto->Items->Count > 0 && isset($objeto->SelectedIndex))
 			$objeto->SelectedIndex = $selected;
 	}
 
