@@ -117,11 +117,7 @@ class Conexion
 		return $drLector->readAll();
 	}
 
-<<<<<<< HEAD
 	public static function Retorna_Registro($conexion, $tabla, $busqueda = array(), $modificadores = "")
-=======
-	public static function Retorna_Registro($conexion, $tabla, $busqueda = null, $modificadores = "")
->>>>>>> origin/master
 	{
 		//Consecutivo para nombrar parámetros
 		$consecutivo = 0;
@@ -142,11 +138,7 @@ class Conexion
 		}
 
 		$consulta = "SELECT * FROM " . $tabla;
-<<<<<<< HEAD
 		if($lista_busqueda != "")
-=======
-		if($busqueda != null)
->>>>>>> origin/master
 			$consulta .= " WHERE " . $lista_busqueda;
 		if($modificadores != "")
 			$consulta .= " " . $modificadores;
