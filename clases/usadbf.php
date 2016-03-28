@@ -102,5 +102,36 @@ class UsaDBF
 		
 		return $records;
 	}
+	
+	function esc($dbfname, $estructura, $contenido)
+	{
+		$fdbf = fopen($dbfname,'w');
+		$long_estruc = count($estructura);
+		$primer_registro = ($long_estruc + 1) * 32 + 1;
+		$longitud_total = array_sum(array_map(function($element) {return $element['longitud'];}, $estructura));
+		$bin = pack("C4Vv2@32", 3, date("y"), date("m"), date("d"), count($contenido), $primer_registro, $longitud_total + 1);
+
+		$ini = 1;
+		foreach($estructura as $est)
+		{
+			$bin .= pack("a11A1VC2@32", $est["nombre"], $est["tipo"], $ini, $est["longitud"], $est["decimales"]);
+			$ini += $est["longitud"];
+		}
+		
+		$bin .= pack("C", 13);
+
+		foreach($contenido as $cont)
+		{
+			$bin .= pack("C", 32);
+			for($i = 0; $i < $long_estruc; $i++)
+				$bin .= pack("A" . $estructura[$i]['longitud'], $cont[$i]);
+		}
+
+		$bin .= pack("C", 26);
+		
+		print_r(unpack("C*",$bin));
+		fwrite($fdbf, $bin);
+		fclose($fdbf); 
+	}
 }
 ?>
