@@ -26,7 +26,6 @@ class UsaDBF
 			echo $i.$buf.'<br/>';} //raw record
 		fclose($fdbf); 
 	}
-
 	public static function registros_dbf($dbfname) 
 	{
 		$fdbf = fopen($dbfname,'r');
@@ -35,7 +34,6 @@ class UsaDBF
 		$buf = fread($fdbf,32);
 		$header = unpack("VRecordCount/vFirstRecord/vRecordLength", substr($buf, 4, 8));
 		$unpackString = '';
-
 		// read fields:
 		while (!feof($fdbf)) 
 		{ 
@@ -49,10 +47,8 @@ class UsaDBF
 			else
 				break;
 		}
-
 		// move back to the start of the first record (after the field definitions)
 		fseek($fdbf, $header['FirstRecord'] + 1); 
-
 		//raw record*/
 		for ($i = 1; $i <= $header['RecordCount']; $i++) 
 		{
@@ -64,7 +60,6 @@ class UsaDBF
 		
 		return $records;
 	}
-
 	public static function crea_dbf($dbfname) 
 	{
 		$fdbf = fopen($dbfname,'r');
@@ -73,7 +68,6 @@ class UsaDBF
 		$buf = fread($fdbf,32);
 		$header = unpack("VRecordCount/vFirstRecord/vRecordLength", substr($buf, 4, 8));
 		$unpackString = '';
-
 		// read fields:
 		while (!feof($fdbf)) 
 		{ 
@@ -87,10 +81,8 @@ class UsaDBF
 			else
 				break;
 		}
-
 		// move back to the start of the first record (after the field definitions)
 		fseek($fdbf, $header['FirstRecord'] + 1); 
-
 		//raw record*/
 		for ($i = 1; $i <= $header['RecordCount']; $i++) 
 		{
@@ -103,14 +95,13 @@ class UsaDBF
 		return $records;
 	}
 	
-	function esc($dbfname, $estructura, $contenido)
+	public static function esc($dbfname, $estructura, $contenido)
 	{
 		$fdbf = fopen($dbfname,'w');
 		$long_estruc = count($estructura);
 		$primer_registro = ($long_estruc + 1) * 32 + 1;
 		$longitud_total = array_sum(array_map(function($element) {return $element['longitud'];}, $estructura));
 		$bin = pack("C4Vv2@32", 3, date("y"), date("m"), date("d"), count($contenido), $primer_registro, $longitud_total + 1);
-
 		$ini = 1;
 		foreach($estructura as $est)
 		{
@@ -119,17 +110,15 @@ class UsaDBF
 		}
 		
 		$bin .= pack("C", 13);
-
 		foreach($contenido as $cont)
 		{
 			$bin .= pack("C", 32);
 			for($i = 0; $i < $long_estruc; $i++)
-				$bin .= pack("A" . $estructura[$i]['longitud'], $cont[$i]);
+				$bin .= pack("A" . $estructura[$i]['longitud'], $cont[$estructura[$i]['nombre']]);
 		}
-
 		$bin .= pack("C", 26);
 		
-		print_r(unpack("C*",$bin));
+		//print_r(unpack("C*",$bin));
 		fwrite($fdbf, $bin);
 		fclose($fdbf); 
 	}
